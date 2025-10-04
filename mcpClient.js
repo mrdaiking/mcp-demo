@@ -1,10 +1,9 @@
 // mcpClient.js
-// Responsible for sending JSON-RPC requests to the MCP Server
-// const fetch = require('node-fetch');
+// Sends JSON-RPC requests to the MCP Server
+const fetch = require('node-fetch');
 
 async function sendContext(context) {
   if (context.tool === 'getTasks') {
-    console.log('🔗 MCP Client ->> 🗄️ MCP Server: JSON-RPC request getTasks');
     const rpcReq = {
       jsonrpc: '2.0',
       method: 'getTasks',
@@ -19,7 +18,6 @@ async function sendContext(context) {
       });
       const rpcRes = await res.json();
       if (rpcRes.result) {
-        console.log('🔗 MCP Client <<-- 🗄️ MCP Server: JSON-RPC result', rpcRes.result);
         return { success: true, data: rpcRes.result };
       } else {
         return { success: false, error: rpcRes.error?.message || 'Unknown error' };

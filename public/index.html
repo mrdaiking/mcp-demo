@@ -20,8 +20,8 @@
   <div class="container">
     <h1>MCP Demo</h1>
     <form id="askForm">
-      <label for="question">Input question:</label>
-      <input type="text" id="question" name="question" placeholder="List of task in Notion?" required>
+      <label for="question">Enter your question:</label>
+      <input type="text" id="question" name="question" placeholder="List all unfinished tasks in Notion?" required>
       <button type="submit">Send</button>
     </form>
   <div class="result" id="result"></div>
@@ -32,12 +32,14 @@
     form.onsubmit = async (e) => {
       e.preventDefault();
       const q = document.getElementById('question').value;
-      resultDiv.innerHTML = 'Đang xử lý...';
+      resultDiv.innerHTML = 'Loadding...';
       try {
         const res = await fetch(`/ask?q="${encodeURIComponent(q)}"`);
         const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          resultDiv.innerHTML = renderTasks(data.data);
+        if (data.success && data.natural) {
+          resultDiv.innerHTML = `<div style=\"background:#e6f7ff;padding:12px 16px;border-radius:6px;margin-bottom:18px;color:#234\">💡 <b>AI Answer:</b> ${data.natural}</div>`;
+        } else if (data.natural) {
+          resultDiv.innerHTML = `<div style=\"background:#e6f7ff;padding:12px 16px;border-radius:6px;margin-bottom:18px;color:#234\">💡 <b>MCP Demo:</b> ${data.natural}</div>`;
         } else {
           resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
         }
@@ -50,7 +52,7 @@
       if (!tasks.length) return '<em>No tasks found.</em>';
       return `
         <div style="margin-top:16px">
-          <h2 style="font-size:1.2em;color:#2d3748">Danh sách Task</h2>
+          <h2 style="font-size:1.2em;color:#2d3748">Task List</h2>
           <ul style="list-style:none;padding:0;">
             ${tasks.map(task => renderTask(task)).join('')}
           </ul>

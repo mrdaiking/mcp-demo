@@ -1,5 +1,4 @@
 
-
 const express = require('express');
 const path = require('path');
 const { handleUserRequest } = require('./mcpHost');
@@ -7,9 +6,10 @@ const { handleUserRequest } = require('./mcpHost');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Serve static files (UI)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// MCP Host: receive user requests and process them
+// Endpoint for listing tasks (for API usage)
 app.get('/tasks', async (req, res) => {
   try {
     const result = await handleUserRequest({ action: 'listTasks' });
@@ -19,7 +19,7 @@ app.get('/tasks', async (req, res) => {
   }
 });
 
-// Endpoint to handle user questions via query parameter
+// Endpoint for natural language Q&A
 app.get('/ask', async (req, res) => {
   try {
     const question = req.query.q || '';
