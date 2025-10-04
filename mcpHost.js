@@ -8,7 +8,7 @@ async function handleUserRequest(userInput) {
   // Determine tool based on user question or action
   let context;
   if (userInput.action === 'listTasks' || (userInput.question && userInput.question.toLowerCase().includes('task'))) {
-    context = { tool: 'listPages' };
+    context = { tool: 'getTasks' };
   } else {
     return { success: false, error: 'Unknown action' };
   }

@@ -1,15 +1,15 @@
 // mcpServer.js
 // Query Notion API, log request/response
 
-const { listPages } = require('./notion');
+const { getTasks } = require('./notion');
 
-async function listPagesWithLog() {
+async function getTasksWithLog() {
   console.log('🗄️ MCP Server ->> 📒 Notion API: Query database');
-  const result = await listPages();
+  const result = await getTasks();
   console.log('🗄️ MCP Server <<-- 📒 Notion API: Response JSON page list');
   return result;
 }
 
 module.exports = {
-  listPages: listPagesWithLog
+  getTasks: getTasksWithLog
 };

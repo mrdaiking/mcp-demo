@@ -20,11 +20,11 @@
   <div class="container">
     <h1>MCP Demo</h1>
     <form id="askForm">
-      <label for="question">Nhập câu hỏi:</label>
+      <label for="question">Input question:</label>
       <input type="text" id="question" name="question" placeholder="List of task in Notion?" required>
-      <button type="submit">Gửi</button>
+      <button type="submit">Send</button>
     </form>
-    <div class="result" id="result"></div>
+  <div class="result" id="result"></div>
   </div>
   <script>
     const form = document.getElementById('askForm');
@@ -36,11 +36,56 @@
       try {
         const res = await fetch(`/ask?q="${encodeURIComponent(q)}"`);
         const data = await res.json();
-        resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        if (data.success && Array.isArray(data.data)) {
+          resultDiv.innerHTML = renderTasks(data.data);
+        } else {
+          resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        }
       } catch (err) {
         resultDiv.innerHTML = '<span style="color:red">Lỗi: ' + err + '</span>';
       }
     };
+
+    function renderTasks(tasks) {
+      if (!tasks.length) return '<em>No tasks found.</em>';
+      return `
+        <div style="margin-top:16px">
+          <h2 style="font-size:1.2em;color:#2d3748">Danh sách Task</h2>
+          <ul style="list-style:none;padding:0;">
+            ${tasks.map(task => renderTask(task)).join('')}
+          </ul>
+        </div>
+      `;
+    }
+
+    function renderTask(task) {
+      const p = task.properties || {};
+      const name = (p['Task name']?.title?.[0]?.plain_text) || '(No title)';
+      const status = p['Status']?.status?.name || '';
+      const statusColor = p['Status']?.status?.color || 'gray';
+      const priority = p['Priority']?.select?.name || '';
+      const priorityColor = p['Priority']?.select?.color || 'gray';
+      const due = p['Due date']?.date?.start || '';
+      const desc = p['Description']?.rich_text?.[0]?.plain_text || '';
+      const url = task.url;
+      // Notion color to CSS
+      const colorMap = {
+        default: '#a0aec0', blue: '#3182ce', green: '#38a169', yellow: '#ecc94b', red: '#e53e3e', pink: '#d53f8c', gray: '#a0aec0', purple: '#805ad5', brown: '#b7791f', orange: '#ed8936'
+      };
+      return `
+        <li style="background:#f9fafb;margin-bottom:16px;padding:16px;border-radius:8px;box-shadow:0 1px 4px #0001">
+          <div style="font-size:1.1em;font-weight:bold;margin-bottom:4px">
+            <a href="${url}" target="_blank" style="color:#2b6cb0;text-decoration:none">${name}</a>
+          </div>
+          <div style="margin-bottom:4px">
+            <span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.9em;background:${colorMap[statusColor]||'#a0aec0'};color:#fff;margin-right:8px">${status}</span>
+            <span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.9em;background:${colorMap[priorityColor]||'#a0aec0'};color:#fff;">${priority}</span>
+            ${due ? `<span style="margin-left:12px;color:#555;font-size:0.95em">🗓 ${due}</span>` : ''}
+          </div>
+          ${desc ? `<div style="margin-top:6px;color:#444;font-size:0.98em">${desc}</div>` : ''}
+        </li>
+      `;
+    }
   </script>
 </body>
 </html>

@@ -1,7 +1,8 @@
 // mcpRpcServer.js
 // MCP JSON-RPC Server to handle requests from MCP Client
 const express = require('express');
-const { listPages } = require('./notion');
+const bodyParser = require('body-parser');
+const { getTasks } = require('./notion');
 
 const app = express();
 app.use(express.json());
@@ -11,10 +12,14 @@ app.post('/rpc', async (req, res) => {
   if (jsonrpc !== '2.0') {
     return res.json({ jsonrpc: '2.0', id, error: { code: -32600, message: 'Invalid JSON-RPC version' } });
   }
-  if (method === 'listPages') {
+  if (method === 'getTasks') {
     try {
-      const result = await listPages();
-      return res.json({ jsonrpc: '2.0', id, result });
+      const tasks = await getTasks();
+      return res.json({
+        jsonrpc: '2.0',
+        result: tasks,
+        id
+      });
     } catch (error) {
       return res.json({ jsonrpc: '2.0', id, error: { code: -32000, message: error.message } });
     }

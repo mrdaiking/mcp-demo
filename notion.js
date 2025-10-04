@@ -1,13 +1,24 @@
 require('dotenv').config();
-const { Client } = require('@notionhq/client');
+const fetch = require('node-fetch');
 
-// Initialize Notion client with token from environment variable
-const notion = new Client({ auth: process.env.NOTION_TOKEN });
+async function getTasks() {
+  const dataSourceId = process.env.NOTION_DATABASE_ID;
+  const response = await fetch(`https://api.notion.com/v1/data_sources/${dataSourceId}/query`, {
+    method: 'POST', // PHẢI là POST
+    headers: {
+      'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+      'Content-Type': 'application/json',
+      'Notion-Version': '2025-09-03'
+    },
+    body: JSON.stringify({ page_size: 10 }) // Có thể thêm filter/sort nếu muốn
+  });
 
-// Get a list of pages from Notion
-async function listPages() {
-  const response = await notion.search({ page_size: 10 })
-  return response.results
+  if (!response.ok) {
+    throw new Error(`Error fetching tasks: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.results;
 }
 
-module.exports = { listPages };
+module.exports = { getTasks }
